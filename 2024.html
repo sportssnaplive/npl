@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sports Snap NPL Live</title>
+<link rel="icon" href="https://i.ibb.co/x239ctn/Sports-Snap-favicon.png" type="image/png">
+<script src='https://sportssnaplive.neocities.org/plyr.js'></script>
+<style>
+  /* Global reset */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+  }
+
+  /* Header styling */
+  #header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  /* Logo image styling */
+  .header-logo {
+    display: block;
+    margin: 0 auto;
+    max-width: 200px; /* Make the logo smaller */
+    height: auto;
+  }
+
+  /* Message notice box below logo */
+  .message-notice {
+    display: block;
+    margin: 5px auto;
+    padding: 10px;
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    border-radius: 8px;
+    width: 90%;
+    font-size: 1em;
+    text-align: center;
+    color: #856404;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    font-weight: bold;
+  }
+
+  /* Note styling */
+  .message-notice .note {
+    font-size: 0.8em;
+    color: #856404;
+    margin-top: 10px;
+  }
+
+  /* Container styling */
+  #match-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    max-width: 600px;
+    margin: auto;
+  }
+
+  /* Team box styling */
+  .team-box {
+    cursor: pointer;
+    background-color: #ffffff;
+    color: #333;
+    padding: 5px 5px;
+    margin: 5px 0;
+    width: 100%;
+    height: 50px;
+    text-align: center;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ddd;
+    transition: background-color 0.3s, transform 0.2s, color 0.2s;
+    position: relative;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  .team-box img {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+  }
+
+  .team-box .team-logo-front {
+    left: 5px;
+  }
+
+  .team-box .team-logo-back {
+    right: 5px;
+  }
+
+  .team-box .vs-text {
+    position: absolute;
+    top: 50%; /* Positioned at the vertical center of the box */
+    left: 50%;
+    transform: translate(-50%, -20%); /* Adjusted to move it down */
+    z-index: 1;
+    color: red;
+    font-size: 1.2em;
+  }
+
+  .team-box .team-name-front,
+  .team-box .team-name-back {
+    position: absolute;
+    z-index: 2;
+    white-space: normal;  /* Allow the text to wrap */
+    word-wrap: break-word; /* Break long words */
+    overflow-wrap: break-word; /* Ensure words break within the container */
+    max-width: 40%; /* Set max-width to limit text length */
+    text-align: center;
+    padding: 0 0px;
+  }
+
+  .team-box .team-name-front {
+    left: 40px;  /* Positioned after the first logo */
+  }
+
+  .team-box .team-name-back {
+    right: 40px; /* Positioned before the second logo */
+  }
+
+  .team-box:hover {
+    background-color: #f2f2f2;
+    transform: scale(1.02);
+    color: #007bff;
+  }
+
+  /* Link box styling */
+  .link-box {
+    display: none;
+    margin-top: 5px;
+    padding: 5px;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    width: 100%;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Link styling */
+  .link {
+    display: block;
+    color: #007bff;
+    text-decoration: none;
+    font-size: 1.1em;
+    margin: 10px 0;
+    padding: 5px;
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    text-align: center;
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  .link:hover {
+    background-color: #007bff;
+    color: white;
+  }
+
+  /* Timer box styling */
+  .countdown-timer {
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 2px solid #ddd; /* Same color as team box border */
+    color: black; /* Timer text color */
+    padding: 2px 8px;
+    font-weight: bold;
+    border-radius: 5px;
+    font-size: 0.8em; /* Reduced size for countdown */
+    background-color: transparent;
+  }
+
+  /* Blinking effect for live now */
+  .count-live-now {
+    color: red;
+    font-weight: bold;
+    font-size: 0.9em; /* Reduced size for Live Now */
+    animation: blink 1s infinite;
+  }
+
+  @keyframes blink {
+    0% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  /* Match end styling */
+  .count-match-end {
+    color: black;
+    font-weight: bold;
+    font-size: 0.9em; /* Reduced size for Match End */
+  }
+
+  /* Responsive Design */
+  @media (max-width: 600px) {
+    .team-box, .link-box {
+      font-size: 1em;
+      padding: 12px;
+    }
+
+    .link {
+      font-size: 1em;
+      padding: 8px;
+    }
+  }
+  
+  
+  .copyright-banner {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 10px 0;
+    font-family: Arial, sans-serif;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+}
+
+.copyright-banner a {
+    color: #ffcc00;
+    text-decoration: none;
+    margin-left: 5px;
+}
+
+.copyright-banner a:hover {
+    text-decoration: underline;
+}
+
+        
+        .telegram-button a:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+</style>
+</head>
+<body>
+
+<!-- Logo at the top -->
+<img src="https://i.ibb.co/BTM5dLF/sportssnap-logo.png" alt="Sports Snap Logo" class="header-logo">
+
+<!-- Message Notice Section (Optional) -->
+<div class="message-notice">
+  Check out today’s NPL matches and click to watch!
+  <div class="note">Note: Link will be active before 15 minutes of match</div>
+</div>
+
+
+<!-- Match containers for teams and links -->
+<div id="match-container">
+  <!-- Team boxes with link sets -->
+  <div class="team-box" onclick="toggleContent('team1')" data-start="2024-12-11T09:00:00+05:45" data-end="2024-12-11T13:00:00+05:45">
+    <div class="countdown-timer" id="timer1"></div>
+    <img src="https://media.cricnepal.com/assets/Janakpur-Bolts-NPL-logo.webp" alt="Team A Logo" class="team-logo-front">
+    <span class="vs-text">vs</span>
+    <img src="https://media.cricnepal.com/assets/Sudurpaschim-Royals-NPL-logo.webp" alt="Team B Logo" class="team-logo-back">
+    <span class="team-name-front" id="team-name1">JANAKPUR</span> <!-- Team A Name -->
+    <span class="team-name-back" id="team-name2">SUDURPACHIM</span> <!-- Team B Name -->
+  </div>
+
+  <div id="team1" class="link-box">
+  <!--https://sportssnaplive.neocities.org/player?src=https://live.mrgamingstream.net/cric.html?id=FANCODE -->
+    <a href="https://www.profitablecpmrate.com/yxdpqiet5?key=930894274c3e9e9d29b57621422e906d" class="link">Link 1 - SMOOTH</a>
+    <a href="https://www.profitablecpmrate.com/yxdpqiet5?key=930894274c3e9e9d29b57621422e906d" class="link">Link 2 - ENGLISH | FULL HD</a>
+    <a href="https://www.profitablecpmrate.com/yxdpqiet5?key=930894274c3e9e9d29b57621422e906d" class="link">Link 3 - NEPAL ONLY | FULL HD</a>
+    <a href="https://www.profitablecpmrate.com/yxdpqiet5?key=930894274c3e9e9d29b57621422e906d" class="link">Link 4 - OUTSIDE NEPAL | FULL HD</a>
+    <a href="https://www.profitablecpmrate.com/yxdpqiet5?key=930894274c3e9e9d29b57621422e906d" class="link">Link 5 - FANCODE LIVE | FULL HD</a>
+    <a href="https://www.profitablecpmrate.com/yxdpqiet5?key=930894274c3e9e9d29b57621422e906d" class="link">Link 6 - ENGLISH | FULL HD</a>
+  </div>
+  
+  
+  
+  <div class="team-box" onclick="toggleContent('team2')" data-start="2024-12-11T13:00:00+05:45" data-end="2024-12-11T17:00:00+05:45">
+    <div class="countdown-timer" id="timer2"></div>
+    <img src="https://www.cricnepal.com/wp-content/uploads/2022/07/Kathmandu-Gurkhas-NepalT20-Icon.webp" alt="Team A Logo" class="team-logo-front">
+    <span class="vs-text">vs</span>
+    <img src="https://media.cricnepal.com/assets/Lumbini-Lions-NPL-logo.webp" alt="Team B Logo" class="team-logo-back">
+    <span class="team-name-front" id="team-name1">KATHMANDU</span> <!-- Team A Name -->
+    <span class="team-name-back" id="team-name2">LUMBINI</span> <!-- Team B Name -->
+  </div>
+
+  <div id="team2" class="link-box">
+  <!--https://sportssnaplive.neocities.org/player?src=https://cuddly-prong-mall.glitch.me/?url=https%3A%2F%2Fcors-proxy.cooks.fyi%2Fhttp%3A%2F%2F41.205.93.154%2FSTARSPORTS1%2Findex.m3u8 -->
+    <a href="https://sportssnaplive.neocities.org/player?src=https://live.mrgamingstream.net/cric.html?id=FANCODE" class="link">Link 1 - SMOOTH</a>
+    <a href="https://www.profitablecpmrate.com/yxdpqiet5?key=930894274c3e9e9d29b57621422e906d" class="link">Link 2 - ENGLISH | FULL HD</a>
+    <a href="https://sportssnaplive.neocities.org/player?src=https://www.youtube-nocookie.com/embed/tacVVxz2X7s?si=SWOc9fEgAg0zc9vy" class="link">Link 3 - NEPAL ONLY | FULL HD</a>
+    <a href="https://www.profitablecpmrate.com/yxdpqiet5?key=930894274c3e9e9d29b57621422e906d" class="link">Link 4 - OUTSIDE NEPAL | FULL HD</a>
+    <a href="https://sportssnaplive.neocities.org/player?src=https://live.mrgamingstream.net/cric.html?id=FANCODE" class="link">Link 5 - FANCODE LIVE | FULL HD</a>
+    <a href="https://www.profitablecpmrate.com/yxdpqiet5?key=930894274c3e9e9d29b57621422e906d" class="link">Link 6 - ENGLISH | FULL HD</a>
+  </div>
+</div>
+
+
+
+
+<script>
+
+  function toggleContent(teamId) {
+    const content = document.getElementById(teamId);
+    content.style.display = content.style.display === 'block' ? 'none' : 'block';
+  }
+
+  function updateCountdowns() {
+    const teamBoxes = document.querySelectorAll('.team-box');
+
+    teamBoxes.forEach((teamBox, index) => {
+      const timerElement = document.getElementById(`timer${index + 1}`);
+      const startTime = new Date(teamBox.dataset.start).getTime();
+      const endTime = new Date(teamBox.dataset.end).getTime();
+      const currentTime = new Date().getTime();
+
+      if (currentTime < startTime) {
+        const timeDiff = startTime - currentTime;
+        const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+        const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+        timerElement.textContent = `${hours}h ${minutes}m ${seconds}s`;
+      } else if (currentTime >= startTime && currentTime <= endTime) {
+        timerElement.textContent = 'Live Now';
+        timerElement.classList.add('count-live-now');
+      } else {
+        timerElement.textContent = 'Match End';
+        timerElement.classList.remove('count-live-now');
+        timerElement.classList.add('count-match-end');
+      }
+    });
+  }
+
+  // Update countdowns every second
+  setInterval(updateCountdowns, 1000);
+
+  // Initialize countdowns on page load
+  document.addEventListener('DOMContentLoaded', updateCountdowns);
+
+
+
+  // Toggle link box visibility when clicking a team box
+function toggleContent(teamId) {
+  // Get all elements with the class 'link-box' (adjust class name as needed)
+  const linkBoxes = document.querySelectorAll('.link-box');
+  
+  // Iterate through all link boxes
+  linkBoxes.forEach((box) => {
+    // If the box is not the one clicked, hide it
+    if (box.id !== teamId) {
+      box.style.display = 'none';
+    }
+  });
+  
+  // Toggle the clicked box
+  const linkBox = document.getElementById(teamId);
+  if (linkBox.style.display === 'block') {
+    linkBox.style.display = 'none';
+  } else {
+    linkBox.style.display = 'block';
+  }
+}
+
+
+</script>
+
+
+<!--DMCA NOTE-->
+<div style="background-color: blue; border: 2px solid yellow; padding: 10px; text-align: center;"><span style="color: white; font-family: arial; font-size: large;"><b><i>DMCA NOTE:</i></b></span></div><div style="background-color: blue; border: 2px solid yellow; padding: 10px; text-align: center;"><span style="color: white; font-family: helvetica; font-weight: bold;">Sports Snap doesn't host media content on its site. Visitors may use external services for content display. The site notifies copyright owners that links and media are hosted elsewhere or embedded from various sites. For legal issues, contact the relevant file owners/hosters. Trademarks, videos, logos belong to their respective owners/companies.</span></div><div><br /></div>
+
+
+<div class="copyright-banner">
+        &copy; 2024 Sports Snap. All rights reserved. <a href="https://sportssnap.net">sportssnap.net</a>
+    </div>
+    
+    <!-- BEGIN: Powered by Supercounters.com -->
+<center><script type="text/javascript" src="//widget.supercounters.com/ssl/online_i.js"></script><script type="text/javascript">sc_online_i(1702623,"ffffff","ffffff");</script><br><noscript><a href="https://www.supercounters.com/">free online counter</a></noscript>
+</center>
+<!-- END: Powered by Supercounters.com -->
+
+    
+    <!-- Telegram Button with Text -->
+<div class="telegram-button" style="position: fixed; bottom: 60px; right: 20px; z-index: 9999; transition: transform 0.3s ease-in-out;">
+    <a href="https://t.me/sportssnapofficial" rel="noopener" style="display: flex; align-items: center; width: auto; height: 60px; border-radius: 30px; background: #389ce9; text-decoration: none; padding: 10px 20px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); transition: box-shadow 0.3s ease-in-out; color: #fff; font-size: 14px; font-weight: 500;">
+        <!-- Telegram Logo -->
+        <svg style="width: 40px; height: 40px; vertical-align: middle; margin-right: 10px;" viewBox="0 0 21 18">
+            <g fill="none">
+                <path d="M0.554,7.092 L19.117,0.078 C19.737,-0.156 20.429,0.156 20.663,0.776 C20.745,0.994 20.763,1.23 20.713,1.457 L17.513,16.059 C17.351,16.799 16.62,17.268 15.88,17.105 C15.696,17.065 15.523,16.987 15.37,16.877 L8.997,12.271 C8.614,11.994 8.527,11.458 8.805,11.074 C8.835,11.033 8.869,10.994 8.905,10.958 L15.458,4.661 C15.594,4.53 15.598,4.313 15.467,4.176 C15.354,4.059 15.174,4.037 15.036,4.125 L6.104,9.795 C5.575,10.131 4.922,10.207 4.329,10.002 L0.577,8.704 C0.13,8.55 -0.107,8.061 0.047,7.614 C0.131,7.374 0.316,7.182 0.554,7.092 Z" fill="#ffffff"/>
+            </g>
+        </svg>
+        
+        Join Us on Telegram to Get Link
+    </a>
+</div>
+
+</body>
+</html>
